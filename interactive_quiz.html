@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Quiz</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .quiz-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #6e8efb;
+            margin-bottom: 30px;
+        }
+        
+        .quiz-header {
+            margin-bottom: 20px;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #6e8efb, #a777e3);
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .question {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .options {
+            display: grid;
+            grid-gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .option {
+            background: #f9f9f9;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .option:hover {
+            background: #f0f0f0;
+            border-color: #6e8efb;
+        }
+        
+        .option.selected {
+            background: #e1e8ff;
+            border-color: #6e8efb;
+        }
+        
+        .option.correct {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+        
+        .option.incorrect {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .result-container {
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .result-container h2 {
+            color: #6e8efb;
+            margin-bottom: 20px;
+        }
+        
+        .score {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+        
+        .restart-btn {
+            margin-top: 20px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div id="quiz">
+            <h1>JavaScript Quiz</h1>
+            
+            <div class="quiz-header">
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <div class="question-count" id="question-count">Question 1 of 5</div>
+            </div>
+            
+            <div class="question" id="question"></div>
+            
+            <div class="options" id="options"></div>
+            
+            <div class="navigation">
+                <button class="btn" id="prev-btn" disabled>Previous</button>
+                <button class="btn" id="next-btn">Next</button>
+            </div>
+        </div>
+        
+        <div class="result-container hidden" id="result-container">
+            <h2>Quiz Completed!</h2>
+            <div class="score" id="score"></div>
+            <p id="result-message"></p>
+            <button class="btn restart-btn" id="restart-btn">Restart Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "What is JavaScript primarily used for in web development?",
+                options: [
+                    "Styling web pages",
+                    "Adding interactivity to web pages",
+                    "Creating database schemas",
+                    "Defining page structure"
+                ],
+                answer: "Adding interactivity to web pages"
+            },
+            {
+                question: "Which keyword is used to declare a variable in JavaScript?",
+                options: [
+                    "var",
+                    "let",
+                    "const",
+                    "All of the above"
+                ],
+                answer: "All of the above"
+            },
+            {
+                question: "What does DOM stand for?",
+                options: [
+                    "Document Object Model",
+                    "Data Object Management",
+                    "Digital Output Module",
+                    "Display Object Method"
+                ],
+                answer: "Document Object Model"
+            },
+            {
+                question: "Which method converts a JSON string to a JavaScript object?",
+                options: [
+                    "JSON.parse()",
+                    "JSON.stringify()",
+                    "JSON.toObject()",
+                    "JSON.convert()"
+                ],
+                answer: "JSON.parse()"
+            },
+            {
+                question: "What is the purpose of the 'addEventListener' method?",
+                options: [
+                    "To add comments to the code",
+                    "To attach an event handler to an element",
+                    "To create new HTML elements",
+                    "To validate form inputs"
+                ],
+                answer: "To attach an event handler to an element"
+            }
+        ];
+        
+        const quiz = document.getElementById('quiz');
+        const questionEl = document.getElementById('question');
+        const optionsEl = document.getElementById('options');
+        const questionCountEl = document.getElementById('question-count');
+        const progressBar = document.getElementById('progress-bar');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const resultContainer = document.getElementById('result-container');
+        const scoreEl = document.getElementById('score');
+        const resultMessageEl = document.getElementById('result-message');
+        const restartBtn = document.getElementById('restart-btn');
+        
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedOption = null;
+        let userAnswers = new Array(quizData.length).fill(null);
+        
+        function loadQuestion() {
+            const question = quizData[currentQuestion];
+            questionEl.textContent = question.question;
+            
+            optionsEl.innerHTML = '';
+            question.options.forEach((option, index) => {
+                const optionEl = document.createElement('div');
+                optionEl.classList.add('option');
+                if (userAnswers[currentQuestion] === option) {
+                    optionEl.classList.add('selected');
+                }
+                optionEl.textContent = option;
+                optionEl.addEventListener('click', () => selectOption(optionEl, option));
+                optionsEl.appendChild(optionEl);
+            });
+            
+            questionCountEl.textContent = `Question ${currentQuestion + 1} of ${quizData.length}`;
+            progressBar.style.width = `${((currentQuestion + 1) / quizData.length) * 100}%`;
+            
+            prevBtn.disabled = currentQuestion === 0;
+            nextBtn.textContent = currentQuestion === quizData.length - 1 ? 'Submit' : 'Next';
+        }
+        
+        function selectOption(optionEl, option) {
+            const options = document.querySelectorAll('.option');
+            options.forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            optionEl.classList.add('selected');
+            selectedOption = option;
+            userAnswers[currentQuestion] = option;
+        }
+        
+        function showResult() {
+            quiz.classList.add('hidden');
+            resultContainer.classList.remove('hidden');
+            
+            // Calculate score
+            score = 0;
+            quizData.forEach((question, index) => {
+                if (userAnswers[index] === question.answer) {
+                    score++;
+                }
+            });
+            
+            const percentage = (score / quizData.length) * 100;
+            scoreEl.textContent = `Your Score: ${score} out of ${quizData.length} (${percentage.toFixed(1)}%)`;
+            
+            if (percentage >= 80) {
+                resultMessageEl.textContent = "Excellent work! You have a strong understanding of JavaScript.";
+            } else if (percentage >= 60) {
+                resultMessageEl.textContent = "Good job! You have a decent understanding but there's room for improvement.";
+            } else if (percentage >= 40) {
+                resultMessageEl.textContent = "Not bad! Keep practicing to improve your JavaScript knowledge.";
+            } else {
+                resultMessageEl.textContent = "Keep learning! Review the basics and try again.";
+            }
+        }
+        
+        function nextQuestion() {
+            if (selectedOption === null && userAnswers[currentQuestion] === null) {
+                alert('Please select an option');
+                return;
+            }
+            
+            if (currentQuestion < quizData.length - 1) {
+                currentQuestion++;
+                selectedOption = null;
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        }
+        
+        function prevQuestion() {
+            currentQuestion--;
+            selectedOption = userAnswers[currentQuestion];
+            loadQuestion();
+        }
+        
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            selectedOption = null;
+            userAnswers = new Array(quizData.length).fill(null);
+            
+            quiz.classList.remove('hidden');
+            resultContainer.classList.add('hidden');
+            loadQuestion();
+        }
+        
+        prevBtn.addEventListener('click', prevQuestion);
+        nextBtn.addEventListener('click', nextQuestion);
+        restartBtn.addEventListener('click', restartQuiz);
+        
+        loadQuestion();
+    </script>
+</body>
+</html>
