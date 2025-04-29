@@ -28,7 +28,7 @@ This phase focused on strengthening front-end web development skills with advanc
 
 ### Project 3: Weather App (API Integration)
 
-![Uploading image.png…]()
+![image](https://github.com/user-attachments/assets/24572fc3-b278-4ac8-ae11-15a255a18b4e)
 
 - **Description**: A real-time weather forecast application using the OpenWeatherMap API.
 - **Features**:
